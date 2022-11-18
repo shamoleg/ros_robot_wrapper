@@ -45,9 +45,11 @@ public:
     WrapperBase(const ros::NodeHandle& n, DataBridgeBase* dataBridgeBase);
     
     void writeCmd();
+    void readState();
     void trace();
 
 private:
+    bool startT=0;
     ros::NodeHandle node;
 
     ros::Publisher pubOdometry;
@@ -58,13 +60,13 @@ private:
     ros::Subscriber subJointVelocity;
     ros::Subscriber subJointTorque;
 
-    void callbackSetBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity);
-    void callbackSetBasePosition(const geometry_msgs::Pose2D& msgBasePosition);
+    void callbackSetBaseVelocity(const geometry_msgs::Twist::ConstPtr& msgBaseVelocity);
+    void callbackSetBasePosition(const geometry_msgs::Pose2D::ConstPtr& msgBasePosition);
     void callbackSetJointVelocity(const std_msgs::Float32MultiArray::ConstPtr& msgJointVelocity);
     void callbackSetJointTorque(const std_msgs::Float32MultiArray::ConstPtr& msgJointTorque);
 
     geometry_msgs::Twist setpointBaseVelocity;
-    geometry_msgs::Pose2D setpointBasePosition;
+    geometry_msgs::Pose2D::ConstPtr setpointBasePosition;
     std_msgs::Float32MultiArray::ConstPtr setpointJointVelocity;
     std_msgs::Float32MultiArray::ConstPtr setpointJointTorque;
 

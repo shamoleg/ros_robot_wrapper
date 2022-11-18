@@ -16,10 +16,10 @@ WrapperBase::WrapperBase(const ros::NodeHandle& n, DataBridgeBase* db):
     subJointTorque = node.subscribe("cmd_joint_torque", 10, &WrapperBase::callbackSetJointTorque, this);
 }
 
-void WrapperBase::callbackSetBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity){
-    this->setpointBaseVelocity = msgBaseVelocity;
+void WrapperBase::callbackSetBaseVelocity(const geometry_msgs::Twist::ConstPtr& msgBaseVelocity){
+    this->setpointBaseVelocity = (*msgBaseVelocity);
 }
-void WrapperBase::callbackSetBasePosition(const geometry_msgs::Pose2D& msgBasePosition){
+void WrapperBase::callbackSetBasePosition(const geometry_msgs::Pose2D::ConstPtr& msgBasePosition){
     this->setpointBasePosition = msgBasePosition;
 }
 void WrapperBase::callbackSetJointVelocity(const std_msgs::Float32MultiArray::ConstPtr& msgJointVelocity){
@@ -46,9 +46,21 @@ void WrapperBase::writeCmd(){
     }
 }
 
+void WrapperBase::readState(){
+    geometry_msgs::Twist currentBaseVelocity;
+    dataBridgeBase->getBaseVelocity(currentBaseVelocity);
+
+    nav_msgs::Odometry odom;
+    odom.twist.twist = currentBaseVelocity;
+    pubOdometry.publish(odom);
+}
+
 void WrapperBase::trace(){
-    std::cout << "setpointBaseVel:   " << this->setpointBaseVelocity.linear.x << std::endl;
-    std::cout << "BASE_CONTROL_MODE: " << this->BASE_CONTROL_MODE << std::endl;
+    if (startT){
+        std::cout << "setpointBaseVel:   " << this->setpointBaseVelocity.linear.x << std::endl;
+        std::cout << "BASE_CONTROL_MODE: " << this->BASE_CONTROL_MODE << std::endl;
+    }
+    
 }
 
 

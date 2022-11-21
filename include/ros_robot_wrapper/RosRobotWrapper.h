@@ -53,18 +53,20 @@ public:
 
 class WrapperJoint : Wrapper{
 public:
-    WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint* dataBridgeJoint);
+    WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint& dataBridgeJoint);
     
     void writeCmd(CONTROL_MODE JOINT_CONTROL_MODE);
     void readAndPub();
     void trace();
 
 private:
+    DataBridgeJoint* dataBridgeJoint;
+    
     void msgSetUp();
     void readAndPubJointState();
 
     ros::NodeHandle node;
-    DataBridgeJoint* dataBridgeJoint;
+    
 
     ros::Publisher pubJointState;
     ros::Subscriber subJointVelocity;
@@ -81,7 +83,7 @@ private:
 
 class WrapperKinematicsBase : Wrapper{
 public:
-    WrapperKinematicsBase(const ros::NodeHandle& n, DataBridgeKinematicsBase* dataBridgeKinematicsBase);
+    WrapperKinematicsBase(const ros::NodeHandle& n, DataBridgeKinematicsBase& dataBridgeKinematicsBase);
     
     void writeCmd(CONTROL_MODE JOINT_CONTROL_MODE);
     void readAndPub();
@@ -96,7 +98,7 @@ private:
     ros::NodeHandle node;
 
     ros::Publisher pubOdometry;
-    tf2_ros::TransformBroadcaster* br;  
+    tf2_ros::TransformBroadcaster br;  
     ros::Subscriber subBaseVelocity;
     ros::Subscriber subBasePosition;
 

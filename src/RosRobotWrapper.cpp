@@ -1,14 +1,15 @@
 #include "RosRobotWrapper.h"
 
-WrapperJoint::WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint* db):
+WrapperJoint::WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint& dataBridgeJoint):
     node(n, "base"){
-    this->dataBridgeJoint = db;
+    this->dataBridgeJoint = &dataBridgeJoint;
     this->msgSetUp();
     
     pubJointState = node.advertise<sensor_msgs::JointState>("joint_states", 10);
     subJointVelocity = node.subscribe("cmd_joint_velocity", 10, &WrapperJoint::callbackSetJointVelocity, this);
     subJointTorque = node.subscribe("cmd_joint_torque", 10, &WrapperJoint::callbackSetJointTorque, this);
 }
+
 
 void WrapperJoint::writeCmd(CONTROL_MODE JOINT_CONTROL_MODE){
     switch (JOINT_CONTROL_MODE){
@@ -35,6 +36,11 @@ void WrapperJoint::readAndPub(){
 }
 
 
+void WrapperJoint::trace(){
+    // std::cout << "setpointBaseVel:   " << this->setpointBaseVelocity.linear.x << std::endl;
+}
+
+
 void WrapperJoint::msgSetUp(){
     this->msgJointState.name = {"w1", "w2", "w3", "w4"};
     this->msgJointState.position.resize(4);
@@ -56,10 +62,9 @@ void WrapperJoint::callbackSetJointTorque(const std_msgs::Float32MultiArray::Con
 
 
 //-------------------------------------
-WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, DataBridgeKinematicsBase* dataBridgeKinematicsBase):
+WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, DataBridgeKinematicsBase& dataBridgeKinematicsBase):
     node(n, "base"){
-    this->dataBridgeKinematicsBase = dataBridgeKinematicsBase;
-    this->br = new tf2_ros::TransformBroadcaster;
+    this->dataBridgeKinematicsBase = &dataBridgeKinematicsBase;
     this->msgSetUp();
 
     pubOdometry = node.advertise<nav_msgs::Odometry>("odom", 10);
@@ -97,7 +102,7 @@ void WrapperKinematicsBase::readAndPub(){
     this->msgTransformOdom.transform.rotation = this->msgOdom.pose.pose.orientation;
 
     this->pubOdometry.publish(this->msgOdom);
-    this->br->sendTransform(this->msgTransformOdom);
+    this->br.sendTransform(this->msgTransformOdom);
 }
 
 

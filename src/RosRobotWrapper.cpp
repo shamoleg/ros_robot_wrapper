@@ -16,15 +16,19 @@ WrapperJoint::WrapperJoint(const ros::NodeHandle& n, BridgeJoint& bridgeJoint):
 
 void WrapperJoint::writeCmd(CONTROL_MODE JOINT_CONTROL_MODE){
     switch (JOINT_CONTROL_MODE){
+
         case CONTROL_MODE::JOINT_VELOCITY:
             bridgeJoint->setJointVelocity(this->setpointJointVelocity);
             break;
+
         case CONTROL_MODE::JOINT_POSITION:
             bridgeJoint->setJointPosition(this->setpointJointVelocity);
             break;
+
         case CONTROL_MODE::JOINT_TORQUE:
             bridgeJoint->setJointTorque(this->setpointJointVelocity);
             break;
+
         default:
             break;
     }
@@ -36,6 +40,13 @@ void WrapperJoint::readAndPub(){
 
     this->msgJointState.header.stamp = ros::Time::now();
     this->pubJointState.publish(this->msgJointState);
+}
+
+
+void WrapperJoint::setNumOfJoint(const int& numOfJoint){
+    this->setpointJointPosition.data.resize(numOfJoint);
+    this->setpointJointVelocity.data.resize(numOfJoint);
+    this->setpointJointTorque.data.resize(numOfJoint);
 }
 
 
@@ -77,9 +88,11 @@ WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, BridgeKin
 
 void WrapperKinematicsBase::writeCmd(CONTROL_MODE BASE_CONTROL_MODE){
     switch (BASE_CONTROL_MODE){
+
         case CONTROL_MODE::BASE_VELOCITY:
             bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
             break;
+
         case CONTROL_MODE::BASE_POSITION:
             bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
             break;
@@ -117,8 +130,12 @@ void WrapperKinematicsBase::trace(){
 
 
 void WrapperKinematicsBase::msgSetUp(){
-    this->msgOdom.header.frame_id = "config->name_odomFrame";
-    this->msgOdom.child_frame_id = "config->name_odomChildFrame";
+}
+
+
+void WrapperKinematicsBase::setOdomFrame(std::string name_odomFrame, std::string name_odomChildFrame){
+    this->msgOdom.header.frame_id = name_odomFrame;
+    this->msgOdom.child_frame_id = name_odomChildFrame;
 
     this->msgTransformOdom.header.frame_id = this->msgOdom.header.frame_id;
     this->msgTransformOdom.child_frame_id = this->msgOdom.child_frame_id;

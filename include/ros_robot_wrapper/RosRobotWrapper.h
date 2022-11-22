@@ -55,6 +55,7 @@ class Wrapper{
 class WrapperJoint : Wrapper{
 public:
     WrapperJoint(const ros::NodeHandle& n, BridgeJoint& bridgeJoint);
+    void setNumOfJoint(const int& numOfJoint);
     
     void writeCmd(CONTROL_MODE JOINT_CONTROL_MODE);
     void readAndPub();
@@ -65,6 +66,7 @@ private:
     
     void msgSetUp();
     void readAndPubJointState();
+    
 
     ros::NodeHandle node;
     
@@ -87,6 +89,7 @@ private:
 class WrapperKinematicsBase : Wrapper{
 public:
     WrapperKinematicsBase(const ros::NodeHandle& n, BridgeKinematicsBase& bridgeKinematicsBase);
+    void setOdomFrame(std::string name_odomFrame, std::string name_odomChildFrame);
     
     void writeCmd(CONTROL_MODE JOINT_CONTROL_MODE);
     void readAndPub();
@@ -97,6 +100,7 @@ private:
 
     void msgSetUp();
     void readAndPubOdom();
+    
 
     ros::NodeHandle node;
 

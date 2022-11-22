@@ -15,6 +15,26 @@
 #include <nav_msgs/Odometry.h>
 
 
+class BridgeJoint{   
+public:
+    virtual void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) = 0;
+    virtual void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) = 0;
+    virtual void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) = 0;
+
+    virtual void getJointState(sensor_msgs::JointState& msgJointState) = 0;
+};
+
+
+class BridgeKinematicsBase{   
+public:
+    virtual void setBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity) = 0;
+    virtual void setBasePosition(const geometry_msgs::Pose& msgBasePosition) = 0;
+
+    virtual void getBaseVelocity(geometry_msgs::Twist& msgBaseVelocity) = 0;
+    virtual void getBasePosition(geometry_msgs::Pose& msgBasePosition) = 0;
+};
+
+
 enum CONTROL_MODE{
     STOP_SEND = 0,
     JOINT_POSITION,
@@ -32,50 +52,33 @@ class Wrapper{
 };
 
 
-class DataBridgeJoint{   
-public:
-    virtual void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) = 0;
-    virtual void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) = 0;
-    virtual void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) = 0;
-
-    virtual void getJointState(sensor_msgs::JointState& msgJointState) = 0;
-};
-
-class DataBridgeKinematicsBase{   
-public:
-    virtual void setBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity) = 0;
-    virtual void setBasePosition(const geometry_msgs::Pose& msgBasePosition) = 0;
-
-    virtual void getBaseVelocity(geometry_msgs::Twist& msgBaseVelocity) = 0;
-    virtual void getBasePosition(geometry_msgs::Pose& msgBasePosition) = 0;
-};
-
-
 class WrapperJoint : Wrapper{
 public:
-    WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint& dataBridgeJoint);
+    WrapperJoint(const ros::NodeHandle& n, BridgeJoint& bridgeJoint);
     
     void writeCmd(CONTROL_MODE JOINT_CONTROL_MODE);
     void readAndPub();
     void trace();
 
 private:
-    DataBridgeJoint* dataBridgeJoint;
+    BridgeJoint* bridgeJoint;
     
     void msgSetUp();
     void readAndPubJointState();
 
     ros::NodeHandle node;
     
-
     ros::Publisher pubJointState;
+    ros::Subscriber subJointPosition;
     ros::Subscriber subJointVelocity;
     ros::Subscriber subJointTorque;
 
     sensor_msgs::JointState msgJointState;
+    std_msgs::Float32MultiArray setpointJointPosition;
     std_msgs::Float32MultiArray setpointJointVelocity;
     std_msgs::Float32MultiArray setpointJointTorque;
-    
+
+    void callbackSetJointPosition(const std_msgs::Float32MultiArray::ConstPtr& msgJointPosition);    
     void callbackSetJointVelocity(const std_msgs::Float32MultiArray::ConstPtr& msgJointVelocity);
     void callbackSetJointTorque(const std_msgs::Float32MultiArray::ConstPtr& msgJointTorque);
 };
@@ -83,14 +86,14 @@ private:
 
 class WrapperKinematicsBase : Wrapper{
 public:
-    WrapperKinematicsBase(const ros::NodeHandle& n, DataBridgeKinematicsBase& dataBridgeKinematicsBase);
+    WrapperKinematicsBase(const ros::NodeHandle& n, BridgeKinematicsBase& bridgeKinematicsBase);
     
     void writeCmd(CONTROL_MODE JOINT_CONTROL_MODE);
     void readAndPub();
     void trace();
 
 private:
-    DataBridgeKinematicsBase* dataBridgeKinematicsBase;
+    BridgeKinematicsBase* bridgeKinematicsBase;
 
     void msgSetUp();
     void readAndPubOdom();

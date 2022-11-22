@@ -1,11 +1,14 @@
 #include "RosRobotWrapper.h"
 
-WrapperJoint::WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint& dataBridgeJoint):
-    node(n, "base"){
-    this->dataBridgeJoint = &dataBridgeJoint;
+
+WrapperJoint::WrapperJoint(const ros::NodeHandle& n, BridgeJoint& bridgeJoint):
+    node(n){
+    this->bridgeJoint = &bridgeJoint;
     this->msgSetUp();
     
     pubJointState = node.advertise<sensor_msgs::JointState>("joint_states", 10);
+
+    subJointPosition = node.subscribe("cmd_joint_position", 10, &WrapperJoint::callbackSetJointPosition, this);
     subJointVelocity = node.subscribe("cmd_joint_velocity", 10, &WrapperJoint::callbackSetJointVelocity, this);
     subJointTorque = node.subscribe("cmd_joint_torque", 10, &WrapperJoint::callbackSetJointTorque, this);
 }
@@ -14,13 +17,13 @@ WrapperJoint::WrapperJoint(const ros::NodeHandle& n, DataBridgeJoint& dataBridge
 void WrapperJoint::writeCmd(CONTROL_MODE JOINT_CONTROL_MODE){
     switch (JOINT_CONTROL_MODE){
         case CONTROL_MODE::JOINT_VELOCITY:
-            dataBridgeJoint->setJointVelocity(this->setpointJointVelocity);
+            bridgeJoint->setJointVelocity(this->setpointJointVelocity);
             break;
         case CONTROL_MODE::JOINT_POSITION:
-            dataBridgeJoint->setJointPosition(this->setpointJointVelocity);
+            bridgeJoint->setJointPosition(this->setpointJointVelocity);
             break;
         case CONTROL_MODE::JOINT_TORQUE:
-            dataBridgeJoint->setJointTorque(this->setpointJointVelocity);
+            bridgeJoint->setJointTorque(this->setpointJointVelocity);
             break;
         default:
             break;
@@ -29,7 +32,7 @@ void WrapperJoint::writeCmd(CONTROL_MODE JOINT_CONTROL_MODE){
 
 
 void WrapperJoint::readAndPub(){
-    dataBridgeJoint->getJointState(this->msgJointState);
+    bridgeJoint->getJointState(this->msgJointState);
 
     this->msgJointState.header.stamp = ros::Time::now();
     this->pubJointState.publish(this->msgJointState);
@@ -37,17 +40,16 @@ void WrapperJoint::readAndPub(){
 
 
 void WrapperJoint::trace(){
-    // std::cout << "setpointBaseVel:   " << this->setpointBaseVelocity.linear.x << std::endl;
+    
 }
 
 
 void WrapperJoint::msgSetUp(){
-    this->msgJointState.name = {"w1", "w2", "w3", "w4"};
-    this->msgJointState.position.resize(4);
-    this->msgJointState.velocity.resize(4);
-    this->msgJointState.effort.resize(4);
+}
 
-    this->setpointJointVelocity.data = {1, 0, 0, 1};
+
+void WrapperJoint::callbackSetJointPosition(const std_msgs::Float32MultiArray::ConstPtr& msgJointPosition){
+    this->setpointJointPosition = (*msgJointPosition);
 }
 
 
@@ -62,9 +64,9 @@ void WrapperJoint::callbackSetJointTorque(const std_msgs::Float32MultiArray::Con
 
 
 //-------------------------------------
-WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, DataBridgeKinematicsBase& dataBridgeKinematicsBase):
-    node(n, "base"){
-    this->dataBridgeKinematicsBase = &dataBridgeKinematicsBase;
+WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, BridgeKinematicsBase& bridgeKinematicsBase):
+    node(n){
+    this->bridgeKinematicsBase = &bridgeKinematicsBase;
     this->msgSetUp();
 
     pubOdometry = node.advertise<nav_msgs::Odometry>("odom", 10);
@@ -76,7 +78,10 @@ WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, DataBridg
 void WrapperKinematicsBase::writeCmd(CONTROL_MODE BASE_CONTROL_MODE){
     switch (BASE_CONTROL_MODE){
         case CONTROL_MODE::BASE_VELOCITY:
-            dataBridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
+            bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
+            break;
+        case CONTROL_MODE::BASE_POSITION:
+            bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
             break;
 
         default:
@@ -89,8 +94,8 @@ void WrapperKinematicsBase::readAndPub(){
     static geometry_msgs::Twist currentBaseVelocity;
     static geometry_msgs::Pose currentBasePosition;
 
-    dataBridgeKinematicsBase->getBaseVelocity(currentBaseVelocity);    
-    dataBridgeKinematicsBase->getBasePosition(currentBasePosition);
+    bridgeKinematicsBase->getBaseVelocity(currentBaseVelocity);    
+    bridgeKinematicsBase->getBasePosition(currentBasePosition);
 
     this->msgOdom.header.stamp = ros::Time::now();
     this->msgOdom.twist.twist = currentBaseVelocity;

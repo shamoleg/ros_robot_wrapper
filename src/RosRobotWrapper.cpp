@@ -21,13 +21,13 @@ void WrapperJoint::writeCmd(CONTROL_MODE JOINT_CONTROL_MODE){
             bridgeJoint->setJointVelocity(this->setpointJointVelocity);
             break;
 
-        case CONTROL_MODE::JOINT_POSITION:
-            bridgeJoint->setJointPosition(this->setpointJointVelocity);
-            break;
+        // case CONTROL_MODE::JOINT_POSITION:
+        //     bridgeJoint->setJointPosition(this->setpointJointVelocity);
+        //     break;
 
-        case CONTROL_MODE::JOINT_TORQUE:
-            bridgeJoint->setJointTorque(this->setpointJointVelocity);
-            break;
+        // case CONTROL_MODE::JOINT_TORQUE:
+        //     bridgeJoint->setJointVelocity(this->setpointJointVelocity);
+        //     break;
 
         default:
             break;
@@ -89,13 +89,13 @@ WrapperKinematicsBase::WrapperKinematicsBase(const ros::NodeHandle& n, BridgeKin
 void WrapperKinematicsBase::writeCmd(CONTROL_MODE BASE_CONTROL_MODE){
     switch (BASE_CONTROL_MODE){
 
-        case CONTROL_MODE::BASE_VELOCITY:
-            bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
-            break;
+        // case CONTROL_MODE::BASE_VELOCITY:
+        //     bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
+        //     break;
 
-        case CONTROL_MODE::BASE_POSITION:
-            bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
-            break;
+        // case CONTROL_MODE::BASE_POSITION:
+        //     bridgeKinematicsBase->setBaseVelocity(this->setpointBaseVelocity);
+        //     break;
 
         default:
             break;

@@ -20,6 +20,7 @@ public:
     virtual void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) = 0;
     virtual void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) = 0;
     virtual void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) = 0;
+    virtual void setJointCurrent(const std_msgs::Float32MultiArray& msgJointTorque) = 0;
 
     virtual void getJointState(sensor_msgs::JointState& msgJointState) = 0;
 };
